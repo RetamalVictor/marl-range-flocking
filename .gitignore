@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Logging and saving 
+logs/
+checkpoint-models/
+
 # C extensions
 *.so
 
