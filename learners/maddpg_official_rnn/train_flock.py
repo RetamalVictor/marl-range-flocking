@@ -1,9 +1,11 @@
+import sys
+sys.path.append(r"C:\Users\victo\Desktop\VU master\thesis\marl-range-flocking")
 import time, os
 import numpy as np
 import argparse
 
 from tqdm import tqdm
-from gym_flock_v2 import make_env
+from environments.gym_flock_v2 import make_env
 from MADDPG import SuperAgent
 
 from torch.utils.tensorboard import SummaryWriter
@@ -114,9 +116,9 @@ if __name__ == "__main__":
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--tau", type=float, default=0.001)
     # add writer params
-    parser.add_argument("--log_dir", type=str, default="maddpgv2_rnn/logs/")
-    parser.add_argument("--exp_name", type=str, default="training_onlyc_v3")
-    parser.add_argument("--save_dir", type=str, default=f"maddpgv2_rnn/checkpoints/maddpg_rnn_onlyv3_{date_now}")
+    parser.add_argument("--log_dir", type=str, default="logs/maddpg_official_rnn/logs/")
+    parser.add_argument("--exp_name", type=str, default="test_of_training")
+    parser.add_argument("--save_dir", type=str, default=f"checkpoint-models/maddpg_rnn_{date_now}")
 
     
     args = parser.parse_args()
