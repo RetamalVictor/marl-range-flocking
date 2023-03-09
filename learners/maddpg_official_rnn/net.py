@@ -63,10 +63,10 @@ class Actor(nn.Module):
         out = self.relu(out)
 
         linear = self.linear_speed(out)
-        linear = self.tanh(linear) * 2.5
+        linear = (self.tanh(linear) + 1) / 2
         
         # angular = self.angular_speed(out)
-        angular = self.linear_speed(out)
+        angular = self.angular_speed(out)
         angular = self.tanh(angular) * 1.5
         
         return torch.cat([linear, angular], dim=1).squeeze(0).cuda(), hidden_next

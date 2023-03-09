@@ -1,5 +1,5 @@
 import sys
-sys.path.append(r"C:\Users\victo\Desktop\VU master\thesis\marl-range-flocking")
+sys.path.append("/home/tugay/marl-range-flocking")
 import time, os
 import numpy as np
 import argparse
@@ -12,8 +12,10 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 def main(args):
-
-    writer = SummaryWriter(log_dir=os.path.join(args.log_dir, args.exp_name))
+    log_dir_ = os.path.join(args.log_dir, args.exp_name)
+    if not os.path.isdir(log_dir_):
+        os.mkdir(log_dir_)
+    writer = SummaryWriter(log_dir=log_dir_)
     env = make_env(args)
     super_agent = SuperAgent(args, env)
     MAX_STEPS = args.max_steps
@@ -97,9 +99,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--nb_agents", type=int, default=10)
     parser.add_argument("--k", type=int, default=4)
-    parser.add_argument("--collision_distance", type=float, default=2.5)
+    parser.add_argument("--collision_distance", type=float, default=1)
     parser.add_argument("--normalize_distance", type=bool, default=False)
-    parser.add_argument("--range_start", type=tuple, default=(0, 50))
+    parser.add_argument("--range_start", type=tuple, default=(0, 30))
     parser.add_argument("--sensor_range", type=float, default=14)
     parser.add_argument("--max_games", type=int, default=1_000_000)
     parser.add_argument("--max_steps", type=int, default=250)
@@ -109,16 +111,16 @@ if __name__ == "__main__":
     parser.add_argument("--ou_sigma", type=float, default=0.2)
     parser.add_argument("--ou_sigma_min", type=float, default=0.001)
     parser.add_argument("--ou_mu", type=float, default=0)
-    parser.add_argument("--ou_dt", type=float, default=0.01)
+    parser.add_argument("--ou_dt", type=float, default=0.001)
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--buffer_size", type=int, default=45_000)
     parser.add_argument("--min_size_buffer", type=int, default=8_000)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--tau", type=float, default=0.001)
     # add writer params
-    parser.add_argument("--log_dir", type=str, default="logs/maddpg_official_rnn/logs/")
-    parser.add_argument("--exp_name", type=str, default="test_of_training")
-    parser.add_argument("--save_dir", type=str, default=f"checkpoint-models/maddpg_rnn_{date_now}")
+    parser.add_argument("--log_dir", type=str, default="/home/tugay/marl-range-flocking/logs/maddpg_official_rnn")
+    parser.add_argument("--exp_name", type=str, default="training_periodic_d")
+    parser.add_argument("--save_dir", type=str, default=f"checkpoint-models")
 
     
     args = parser.parse_args()

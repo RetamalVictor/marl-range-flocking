@@ -72,7 +72,8 @@ class MultiAgentEnv(gym.Env):
         # update the state
         self._updateState(action, dt)
         self.check_boundary()
-        self._computeDistances()
+        # self._computeDistances()
+        self._computePeriodicDistances()
         self._computeCollisions()
 
         obs = self._computeObs()
@@ -130,6 +131,26 @@ class MultiAgentEnv(gym.Env):
                 Critic observations are the distances to the k nearest neighbors, the velocities and the positions and headings.
         """
         return {"critic":self._generate_batch_critic(), "actors":self._generate_batch_actors()}
+
+    def _computePeriodicDistances(self):
+        self.positions = self.positions.detach()
+        xx1, xx2 = torch.meshgrid(self.positions[:,0], self.positions[:,0])
+        yy1, yy2 = torch.meshgrid(self.positions[:,1], self.positions[:,1])
+
+        d_ij_x = torch.abs(xx1 - xx2)
+        d_ij_y = torch.abs(yy1 - yy2)
+        d_ij_x = torch.where(d_ij_x > self.boundary / 2, self.boundary - d_ij_x, d_ij_x)
+        d_ij_y = torch.where(d_ij_y > self.boundary / 2, self.boundary - d_ij_y, d_ij_y)
+        self.distances = torch.sqrt(torch.multiply(d_ij_x, d_ij_x) + torch.multiply(d_ij_y, d_ij_y))
+
+        # Nearest neighbors
+        distances_to_nearest_neighbors, nearest_neighbors = torch.topk(
+            -self.distances, self.k + 1, dim=1
+        )
+        self.nearest_neighbors = nearest_neighbors[:, 1:]
+        self.distances_to_nearest_neighbors = torch.clamp(-distances_to_nearest_neighbors[:, 1:], min=0, max=self.sensor_range)
+
+
 
     def _computeDistances(self):
         self.positions = self.positions.detach()
@@ -307,7 +328,7 @@ class MultiAgentEnv(gym.Env):
             # self.prev_angular_velocity = angular_velocity
             self.headings += angular_velocity * dt
             # clip linear velocity to be greater than 0
-            linear_velocity = torch.clamp(linear_velocity, 0.5, self.max_linear_velocity)
+            linear_velocity = torch.clamp(linear_velocity, 0.005, self.max_linear_velocity)
             # clip angular velocity to be between -pi and pi using torch.clamp
 
             # convert linear and angular velocity to x and y velocity
@@ -408,8 +429,8 @@ def make_env(args) -> MultiAgentEnv:
     return env
 
 def test_env():
-    nb_agents = 10
-    k = 4
+    nb_agents = 4
+    k = 2
 
     # Initialize the environment
     env = MultiAgentEnv(
@@ -417,7 +438,7 @@ def test_env():
         k,
         collision_distance=1,
         normalize_distance=False,
-        range_start=(0, 50),
+        range_start=(0, 10),
         sensor_range=14,
     )
 
@@ -439,7 +460,7 @@ def test_env():
                                 # np.zeros((nb_agents)),
                                 # np.zeros((nb_agents)),
                                 np.random.uniform(-3.2, 3.2, nb_agents),
-                                np.random.uniform(-2, 2, nb_agents),
+                                np.random.uniform(0.5, 2, nb_agents),
                             ]
                         ).reshape(nb_agents, 2)
                     )
@@ -450,8 +471,8 @@ def test_env():
                 # prey_action = torch.from_numpy(actions).float().cuda()
                 # print(prey_action)
                 obs, reward, dones, _ = env.step(prey_action)
-                pprint(observation["critic"])
-                print("reward", reward)
+                pprint(observation["actors"])
+                # print("reward", reward)
             if dones[1]:
                 observation = env.reset()
                 print("reset")

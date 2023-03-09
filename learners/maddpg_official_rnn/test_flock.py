@@ -2,7 +2,7 @@
 Load the models from the folder "tmp\ddpg" and run them in the environment.
 """
 import sys
-sys.path.append(r"C:\Users\victo\Desktop\VU master\Multiagent\multi-rl-crowd-sim-mains")
+sys.path.append("/home/tugay/marl-range-flocking")
 import os
 import torch
 import numpy as np
@@ -12,7 +12,7 @@ import numpy as np
 import argparse
 
 from tqdm import tqdm
-from gym_flock_v2 import make_env
+from environments.gym_flock_v2 import make_env
 from MADDPG import SuperAgent
 
 from torch.utils.tensorboard import SummaryWriter
@@ -29,8 +29,8 @@ def main(args):
         # Checkpoint loading 
         # super_agent.load()
         for i in range(9):
-            # super_agent.load_single_checkpoint(fr"C:\Users\victo\Desktop\VU master\Multiagent\multi-rl-crowd-sim-main\maddpgv2_rnn\checkpoints\maddpg_rnn_collv3_2023-02-23-2115\agent_number_{i}_actor_ddpg.pt")
-            super_agent.load_scaled_checkpoint(r"C:\Users\victo\Desktop\VU master\Multiagent\multi-rl-crowd-sim-main\maddpgv2_rnn\checkpoints\maddpg_rnn_casv2_2023-02-24-0731 copy", total=9)
+            super_agent.load_single_checkpoint(f"/home/tugay/marl-range-flocking/learners/maddpg_official_rnn/checkpoint-models/agent_number_{i}_actor_ddpg.pt")
+            # super_agent.load_scaled_checkpoint("/home/tugay/marl-range-flocking/learners/maddpg_official_rnn/checkpoint-models", total=9)
         
             for n_game in range(args.max_games):
                 start_time = time.time()
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     parser.add_argument("--range_start", type=tuple, default=(0, 30))
     parser.add_argument("--sensor_range", type=float, default=14)
     parser.add_argument("--max_games", type=int, default=3)
-    parser.add_argument("--max_steps", type=int, default=250)
+    parser.add_argument("--max_steps", type=int, default=1000)
     parser.add_argument("--save_freq", type=int, default=250)
     parser.add_argument("--evaluation_freq", type=int, default=25)
     parser.add_argument("--ou_theta", type=float, default=0.15)
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     # add writer params
     parser.add_argument("--log_dir", type=str, default="maddpgv2/logs/")
     parser.add_argument("--exp_name", type=str, default="test_5")
-    parser.add_argument("--save_dir", type=str, default=r"C:\Users\victo\Desktop\VU master\Multiagent\multi-rl-crowd-sim-main\maddpgv2")
+    parser.add_argument("--save_dir", type=str, default=r"/home/tugay/marl-range-flocking/learners/maddpg_official_rnn")
 
     
     args = parser.parse_args()
